@@ -32,37 +32,38 @@ class ActionsShippableorder
 
 		if (in_array('ordercard',explode(':',$parameters['context'])) && $object->statut < 3)
         {
+            if (!empty($object->lines)) {
+                dol_include_once('/shippableorder/class/shippableorder.class.php');
+                include_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 
-			dol_include_once('/shippableorder/class/shippableorder.class.php');
-			include_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+                $shippableOrder =  &$object->shippableorder;
+                $form = new Form($db);
+                $virtualTooltip = ShippableOrder::prepareTooltip();
+                $textColor = $conf->global->THEME_ELDY_TEXTTITLE;
 
-			$shippableOrder =  &$object->shippableorder;
-            $form = new Form($db);
-            $virtualTooltip = ShippableOrder::prepareTooltip();
-            $textColor = $conf->global->THEME_ELDY_TEXTTITLE;
+                ?>
+                <script type="text/javascript">
+                    $('table#tablelines tr.liste_titre td.linecoldescription').first().after('<td class="linecolstock" align="right" style="color:<?php echo $textColor ?>;"><?php echo $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip) ?></td><td class="linecolstock" align="right" style="<?php echo $textColor ?>;"><?php echo $langs->trans('RealStock') ?></td>');
 
-			?>
-			<script type="text/javascript">
-				$('table#tablelines tr.liste_titre td.linecoldescription').first().after('<td class="linecolstock" align="right" style="color:<?php echo $textColor ?>;"><?php echo $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip) ?></td><td class="linecolstock" align="right" style="<?php echo $textColor ?>;"><?php echo $langs->trans('RealStock') ?></td>');
+                    <?php
+                    foreach($object->lines as &$line) {
 
-                <?php
-				foreach($object->lines as &$line) {
+                        $stock = $shippableOrder->orderLineStockStatus($line,true);
 
-					$stock = $shippableOrder->orderLineStockStatus($line,true);
+                        ?>
+                        $('table#tablelines tr[id=row-<?php echo $line->id; ?>] td.linecoldescription').after("<td class=\"linecolstockvirtual nowrap\" align=\"right\"><?php echo addslashes($stock[1]) ?></td><td class=\"linecolstock nowrap\" align=\"right\"><?php echo addslashes($stock[0]) ?></td>");
+                        <?php
+                    } ?>
+                    $('table#tablelines tr.liste_titre_add td.linecoldescription').first().after('<td class="linecolstockvirtual" align="right"></td><td class="linecolstock" align="right"></td>');
+                    $('table#tablelines tr.liste_titre_add').next().children('td.linecoldescription').first().after('<td class="linecolstockvirtual" align="right"></td><td class="linecolstock" align="right"></td>');
 
-					?>
-					$('table#tablelines tr[id=row-<?php echo $line->id; ?>] td.linecoldescription').after("<td class=\"linecolstockvirtual nowrap\" align=\"right\"><?php echo addslashes($stock[1]) ?></td><td class=\"linecolstock nowrap\" align=\"right\"><?php echo addslashes($stock[0]) ?></td>");
-					<?php
-				} ?>
-				$('table#tablelines tr.liste_titre_add td.linecoldescription').first().after('<td class="linecolstockvirtual" align="right"></td><td class="linecolstock" align="right"></td>');
-				$('table#tablelines tr.liste_titre_add').next().children('td.linecoldescription').first().after('<td class="linecolstockvirtual" align="right"></td><td class="linecolstock" align="right"></td>');
-
-				$('table#tablelines tr.liste_titre_create td.linecoldescription').first().after('<td class="linecolstockvirtual nobottom" align="right"></td><td class="linecolstock nobottom" align="right"></td>');
-				$('table#tablelines tr.liste_titre_create').next().children('td.linecoldescription').first().after('<td class="linecolstockvirtual nobottom" align="right"></td><td class="linecolstock nobottom" align="right"></td>');
-				$('#trlinefordates td:first').after('<td class="linecolstockvirtual" align="right"></td><td class="linecolstock" align="right"></td>'); // Add empty column in objectline_create
-				if($('tr[id^="extrarow"]').length > 0) $('tr[id^="extrarow"] td:first').after('<td class="linecolstockvirtual" align="right"></td<td class="linecolstock" align="right"></td>');
-			</script>
+                    $('table#tablelines tr.liste_titre_create td.linecoldescription').first().after('<td class="linecolstockvirtual nobottom" align="right"></td><td class="linecolstock nobottom" align="right"></td>');
+                    $('table#tablelines tr.liste_titre_create').next().children('td.linecoldescription').first().after('<td class="linecolstockvirtual nobottom" align="right"></td><td class="linecolstock nobottom" align="right"></td>');
+                    $('#trlinefordates td:first').after('<td class="linecolstockvirtual" align="right"></td><td class="linecolstock" align="right"></td>'); // Add empty column in objectline_create
+                    if($('tr[id^="extrarow"]').length > 0) $('tr[id^="extrarow"] td:first').after('<td class="linecolstockvirtual" align="right"></td<td class="linecolstock" align="right"></td>');
+                </script>
 			<?php
+            }
 		}
 
 	}
