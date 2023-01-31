@@ -43,7 +43,12 @@ class ActionsShippableorder
 
                 ?>
                 <script type="text/javascript">
-                    $('table#tablelines tr.liste_titre td.linecoldescription').first().after('<td class="linecolstock" align="right" style="color:<?php echo $textColor ?>;"><?php echo $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip) ?></td><td class="linecolstock" align="right" style="<?php echo $textColor ?>;"><?php echo $langs->trans('RealStock') ?></td>');
+                    var lineColDescription = $('table#tablelines tr.liste_titre th.linecoldescription');
+                    if (lineColDescription.length) {
+                        lineColDescription.first().after('<th class="linecolstock" align="right" style="color:<?php echo $textColor ?>;"><?php echo $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip) ?></th><th class="linecolstock" align="right" style="<?php echo $textColor ?>;"><?php echo $langs->trans('RealStock') ?></th>');
+                    } else {
+                        $('table#tablelines tr.liste_titre td.linecoldescription').first().after('<td class="linecolstock" align="right" style="color:<?php echo $textColor ?>;"><?php echo $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip) ?></td><td class="linecolstock" align="right" style="<?php echo $textColor ?>;"><?php echo $langs->trans('RealStock') ?></td>');
+                    }
 
                     <?php
                     foreach($object->lines as &$line) {
