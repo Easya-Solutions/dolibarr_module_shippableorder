@@ -40,10 +40,24 @@ class ActionsShippableorder
                 $form = new Form($db);
                 $virtualTooltip = ShippableOrder::prepareTooltip();
             	$textColor = !empty($conf->global->THEME_ELDY_TEXTTITLE) ? $conf->global->THEME_ELDY_TEXTTITLE : '';
+                $jsConf = array(
+                    'textColor' => $textColor,
+                    'TheoreticalStockLabel' => $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip),
+                    'RealStock' => $langs->trans('RealStock')
+                );
 
                 ?>
                 <script type="text/javascript">
-                    $('table#tablelines tr.liste_titre td.linecoldescription').first().after('<td class="linecolstock" align="right" style="color:<?php echo $textColor ?>;"><?php echo $form->textwithpicto($langs->trans('TheoreticalStock'), $virtualTooltip) ?></td><td class="linecolstock" align="right" style="<?php echo $textColor ?>;"><?php echo $langs->trans('RealStock') ?></td>');
+                    let jsConf = <?php echo  json_encode($jsConf); ?>;
+                    // From version 17 of Dolibarr and on other themes, the first column lines use a "th" tag instead of "td".
+                    // With the method below that allows to detect the "th" tag or the "td", we cover all versions and themes without fixing a version:
+                    let colTag = 'th';
+                    let lineColDescription = $('table#tablelines tr.liste_titre '+colTag+'.linecoldescription');
+                    if (lineColDescription.length == 0) {
+                        colTag = 'td';
+                        lineColDescription = $('table#tablelines tr.liste_titre '+colTag+'.linecoldescription');
+                    }
+                    lineColDescription.first().after('<'+colTag+' class="linecolstock" align="right" style="color:'+jsConf.textColor+';">'+jsConf.TheoreticalStockLabel+'</'+colTag+'><'+colTag+' class="linecolstock" align="right" style="color:'+jsConf.textColor+';">'+jsConf.RealStock+'</'+colTag+'>');
 
                     <?php
                     foreach($object->lines as &$line) {
