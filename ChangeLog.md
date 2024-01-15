@@ -1,8 +1,14 @@
 # ChangeLog for ShippableOrder
 
-## Unreleased
+## UNRELEASED
 
 
+
+## RELEASE 2.4
+
+- NEW : Dolibarr compatibility V19 - *29/11/2023*  - 2.4.0 
+  Changed Dolibarr compatibility range to 12 min - 19 max  
+  Change PHP compatibility range to 7.0 min - 8.2 max
 
 ## 2.3
 - FIX : Ticket DA024347 token not transmitted if empty querry result   - *15/01/2024* - 2.3.9  

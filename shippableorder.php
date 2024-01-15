@@ -87,7 +87,7 @@ $diroutputpdf = $conf->shippableorder->multidir_output[$conf->entity];
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array(
-		'shippableorderlist'
+		'shippableorderlist' 
 ));
 
 /**
@@ -102,14 +102,15 @@ $action = GETPOST('action','alphanohtml');
 
 switch ($action) {
 	case 'createShipping' :
+        
 		if (! empty($_REQUEST['subCreateShip'])) {
-			$TIDCommandes = $_REQUEST['TIDCommandes'];
-			$TEnt_comm = $_REQUEST['TEnt_comm'];
-
+			$TIDCommandes = key_exists('TIDCommandes', $_REQUEST) ? $_REQUEST['TIDCommandes']: '';
+			$TEnt_comm =  key_exists('TEnt_comm', $_REQUEST) ? $_REQUEST['TEnt_comm']: '';
+			
 			$order = new ShippableOrder($db);
 			$order->createShipping($TIDCommandes, $TEnt_comm);
 		}
-
+		
 		if (! empty($_REQUEST['subSetSent'])) {
 			$TIDCommandes = $_REQUEST['TIDCommandes'];
 			$order = new Commande($db);
@@ -117,14 +118,14 @@ switch ($action) {
 				$order->setStatut(2, $idCommande, 'commande');
 			}
 		}
-
+		
 		break;
-
+	
 	case 'remove_file' :
 		$file = GETPOST('file');
 		if (! empty($file)) {
 			$file = DOL_DATA_ROOT . '/shippableorder/' . $file;
-
+						
 			$ret = dol_delete_file($file, 0, 0, 0);
 			if ($ret) {
 				setEventMessage($langs->trans("FileWasRemoved", GETPOST('file')));
@@ -133,45 +134,45 @@ switch ($action) {
 				setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('file')), 'errors');
 			}
 		}
-
+		
 		break;
-
+	
 		case 'delete_all_pdf_files':
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"], $langs->trans('DeleteAllFiles'), $langs->trans('ConfirmDeleteAllFiles'), 'confirm_delete_all_pdf_files', '', 'no', 1);
-
-
+		
+		
 			break;
 		case 'confirm_delete_all_pdf_files':
 			if($confirm == 'yes') {
-
+					
 				$order = new ShippableOrder($db);
 				$order->removeAllPDFFile();
-
+					
 				setEventMessage($langs->trans("FilesWereRemoved"));
 			}
-
+		
 			break;
-
-
+		
+					
 		case 'archive_files':
-
+		
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"], $langs->trans('ArchiveFiles'), $langs->trans('ConfirmArchiveFiles'), 'confirm_archive_files', '', 'no', 1);
-
+		
 		break;
-
+	
 	case 'confirm_archive_files':
-
+		
 		if($confirm == 'yes') {
-
+			
 			$order = new ShippableOrder($db);
 			$order->zipFiles();
-
+			
 		}
-
+		
 		break;
-
+		
 	default :
-
+		
 		break;
 }
 
@@ -180,10 +181,10 @@ switch ($action) {
  */
 
 $parameters = array(
-		'socid' => $socid
+		'socid' => $socid 
 );
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hook
-
+                                                                              
 // Do we click on purge search criteria ?
 if (GETPOST("button_removefilter_x")) {
 	$search_user = '';
@@ -219,8 +220,8 @@ llxHeader('', $langs->trans("ShippableOrders"), $help_url);
 echo $formconfirm;
 ?>
 <script type="text/javascript">
-$(document).ready(function() {
-
+$(document).ready(function() {	
+	
 	// **This check determines if using a jQuery version 1.7 or newer which requires the use of the prop function instead of the attr function when not called on an attribute
 	if ($().prop) {
 		$("#checkall").click(function() {
@@ -239,12 +240,12 @@ $(document).ready(function() {
 		});
 	  }
 
-
+	
 });
 </script>
 <?php
 
-if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 	$sql = 'SELECT s.nom, s.rowid as socid, s.client, c.rowid, c.ref, cd.total_ht, c.ref_client, cd.rowid as lineid, cd.subprice, cd.fk_product,';
 	$sql .= ' c.date_valid, c.date_commande, c.note_private, cde.date_de_livraison as date_livraison, c.fk_statut, c.facture as facturee,';
 
@@ -257,7 +258,7 @@ else
 if (!empty($conf->clinomadic->enabled)) {
 	$sql .= " ce.reglement_recu,";
 }
-if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))  $sql .= 'cd.qty as qty_prod';
+if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))  $sql .= 'cd.qty as qty_prod';
 else $sql .= ' (SELECT SUM(qty) FROM ' . MAIN_DB_PREFIX . 'commandedet WHERE fk_commande = c.rowid AND fk_product > 0 AND product_type = 0) as qty_prod';
 $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe as s';
 $sql .= ', ' . MAIN_DB_PREFIX . 'commande as c';
@@ -265,12 +266,12 @@ $sql .= ', ' . MAIN_DB_PREFIX . 'commandedet as cd';
 if (!empty($conf->clinomadic->enabled)) {
 	$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "commande_extrafields as ce ON (ce.fk_object = cd.fk_commande)";
 }
-if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 	$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "commandedet_extrafields as cde ON (cde.fk_object = cd.rowid)";
 	$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "product as prod ON (prod.rowid = cd.fk_product)";
 }
 // We'll need this table joined to the select in order to filter by sale
-if ($search_sale > 0 || (! $user->rights->societe->client->voir && ! $socid))
+if ($search_sale > 0 || (! $user->hasRight('societe', 'client', 'voir') && ! $socid))
 	$sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
 if ($search_user > 0) {
 	$sql .= ", " . MAIN_DB_PREFIX . "element_contact as ec";
@@ -281,7 +282,7 @@ $sql .= ' AND c.rowid = cd.fk_commande';
 $sql .= ' AND c.entity = ' . $conf->entity;
 if ($socid)
 	$sql .= ' AND s.rowid = ' . $socid;
-if (! $user->rights->societe->client->voir && ! $socid)
+if (! $user->hasRight('societe', 'client', 'voir') && ! $socid)
 	$sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " . $user->id;
 if ($sref) {
 	$sql .= natural_search('c.ref', $sref);
@@ -289,7 +290,7 @@ if ($sref) {
 if ($sall) {
 	$sql .= natural_search(array(
 			'c.ref',
-			'c.note_private'
+			'c.note_private' 
 	), $sall);
 }
 if ($ordermonth > 0) {
@@ -306,24 +307,24 @@ if ($deliverymonth > 0)
 {
 	if ($deliveryyear > 0 && empty($day))
 	{
-		if(empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$sql .= " AND c.date_livraison BETWEEN '".$db->idate(dol_get_first_day($deliveryyear, $deliverymonth, false))."' AND '".$db->idate(dol_get_last_day($deliveryyear, $deliverymonth, false))."'";
+		if(!getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$sql .= " AND c.date_livraison BETWEEN '".$db->idate(dol_get_first_day($deliveryyear, $deliverymonth, false))."' AND '".$db->idate(dol_get_last_day($deliveryyear, $deliverymonth, false))."'";
 		else $sql .= " AND cde.date_de_livraison BETWEEN '".$db->idate(dol_get_first_day($deliveryyear, $deliverymonth, false))."' AND '".$db->idate(dol_get_last_day($deliveryyear, $deliverymonth, false))."'";
 	}
 	else if ($deliveryyear > 0 && !empty($day))
 	{
-		if(empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$sql .= " AND c.date_livraison BETWEEN '".$db->idate(dol_mktime(0, 0, 0, $deliverymonth, $day, $deliveryyear))."' AND '".$db->idate(dol_mktime(23, 59, 59, $deliverymonth, $day, $deliveryyear))."'";
+		if(!getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$sql .= " AND c.date_livraison BETWEEN '".$db->idate(dol_mktime(0, 0, 0, $deliverymonth, $day, $deliveryyear))."' AND '".$db->idate(dol_mktime(23, 59, 59, $deliverymonth, $day, $deliveryyear))."'";
 		else $sql .= " AND cde.date_de_livraison BETWEEN '".$db->idate(dol_mktime(0, 0, 0, $deliverymonth, $day, $deliveryyear))."' AND '".$db->idate(dol_mktime(23, 59, 59, $deliverymonth, $day, $deliveryyear))."'";
 
 	}
 	else
 	{
-		if(empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$sql .= " AND date_format(c.date_livraison, '%m') = '".$deliverymonth."'";
+		if(!getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$sql .= " AND date_format(c.date_livraison, '%m') = '".$deliverymonth."'";
 		else $sql .= " AND date_format(cde.date_de_livraison, '%m') = '".$deliverymonth."'";
 	}
 }
 else if ($deliveryyear > 0)
 {
-	if(empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$sql .= " AND c.date_livraison BETWEEN '".$db->idate(dol_get_first_day($deliveryyear, 1, false))."' AND '".$db->idate(dol_get_last_day($deliveryyear, 12, false))."'";
+	if(!getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$sql .= " AND c.date_livraison BETWEEN '".$db->idate(dol_get_first_day($deliveryyear, 1, false))."' AND '".$db->idate(dol_get_last_day($deliveryyear, 12, false))."'";
 	else $sql .= " AND cde.date_de_livraison BETWEEN '".$db->idate(dol_get_first_day($deliveryyear, 1, false))."' AND '".$db->idate(dol_get_last_day($deliveryyear, 12, false))."'";
 }
 if (! empty($snom)) {
@@ -344,12 +345,12 @@ if ($search_user > 0) {
 if($search_status_cmd > 0) $sql.= ' AND c.fk_statut = '.$search_status_cmd;
 else $sql .= ' AND c.fk_statut IN (1,2)';
 
-if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
+if (!getDolGlobalString('STOCK_SUPPORTS_SERVICES')) {
 	$sql .= ' AND cd.product_type = 0';
 }
 
 
-if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$sql.= ' GROUP BY cd.rowid, cde.date_de_livraison, s.rowid, c.rowid ';
+if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$sql.= ' GROUP BY cd.rowid, cde.date_de_livraison, s.rowid, c.rowid ';
 else $sql .= ' GROUP BY c.rowid, s.rowid';
 $sql.=  ' ORDER BY ' . $sortfield . ' ' . $sortorder;
 if ($limit > 0) {
@@ -369,7 +370,7 @@ if ($resql) {
 	} else {
 		$title = $langs->trans('ShippableOrders');
 	}
-
+	
 	$param = '';
 	if ($socid)
 		$param .= '&socid=' . $socid;
@@ -398,10 +399,10 @@ if ($resql) {
 		$param .= '&search_status_cmd=' . $search_status_cmd;
 	if ($limit === false)
 		$param .= '&show_all=1';
-
+	
 	$num = $db->num_rows($resql);
 	$i = 0;
-
+	
 	if ($limit !== false) {
 		$totalLine = null;
 		if (isset($sql2)) {
@@ -413,28 +414,28 @@ if ($resql) {
 	} else {
 		print_fiche_titre($title, '<a href="' . $_SERVER["PHP_SELF"] . '?show_all=0' . (str_replace('&show_all=1', '', $param)) . '">' . $langs->trans('NotShowAllLine') . '</a>', $picto = 'title_generic.png');
 	}
-
+	
 	// Lignes des champs de filtre
 	print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
 	print '<input type="hidden" name="token" value="'.$newToken.'">';
 	print '<table class="noborder liste" width="100%">';
-
+	
 	$moreforfilter = '';
-
+	
 	// If the user can view prospects other than his'
-	if ($user->rights->societe->client->voir || $socid) {
+	if ($user->hasRight('societe', 'client', 'voir') || $socid) {
 		$langs->load("commercial");
 		$moreforfilter .= $langs->trans('ThirdPartiesOfSaleRepresentative') . ': ';
 		$moreforfilter .= $formother->select_salesrepresentatives($search_sale, 'search_sale', $user);
 		$moreforfilter .= ' &nbsp; &nbsp; &nbsp; ';
 	}
 	// If the user can view prospects other than his'
-	if ($user->rights->societe->client->voir || $socid) {
+	if ($user->hasRight('societe', 'client', 'voir') || $socid) {
 		$moreforfilter .= $langs->trans('LinkedToSpecificUsers') . ': ';
 		$moreforfilter .= $form->select_dolusers($search_user, 'search_user', 1);
 	}
-
-	if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+	
+	if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 		$moreforfilter .= '<td></td>';
 	}
 	if (! empty($moreforfilter)) {
@@ -445,7 +446,7 @@ if ($resql) {
 		print '</td><td>';
 		print '</td></tr>';
 	}
-
+	
 	print '<tr class="liste_titre">';
 	if ($limit === false)
 		print '<input type="hidden" name="show_all" value="1" />';
@@ -453,11 +454,11 @@ if ($resql) {
 	if (!empty($conf->clinomadic->enabled))
 		print_liste_field_titre($langs->trans('Règlement'), $_SERVER["PHP_SELF"], 'c.ref_client', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans('RefCustomerOrder'), $_SERVER["PHP_SELF"], 'c.ref_client', '', $param, '', $sortfield, $sortorder);
-	if (!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))
+	if (getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))
 		print_liste_field_titre($langs->trans('Product'), $_SERVER["PHP_SELF"], '', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans('Company'), $_SERVER["PHP_SELF"], 's.nom', '', $param, '', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans('OrderDate'), $_SERVER["PHP_SELF"], 'c.date_commande', '', $param, 'align="right"', $sortfield, $sortorder);
-	if (!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))
+	if (getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))
 	{
 		print_liste_field_titre($langs->trans('DeliveryDate'), $_SERVER["PHP_SELF"], 'cde.date_de_livraison', '', $param, 'align="right"', $sortfield, $sortorder);
 
@@ -475,12 +476,12 @@ if ($resql) {
 	print_liste_field_titre($langs->trans('InStock'), $_SERVER["PHP_SELF"], 'qty_prod', '', $param, 'align="right"', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans('Warehouse'), $_SERVER["PHP_SELF"], 'qty_prod', '', $param, 'align="right"', $sortfield, $sortorder);
 	print_liste_field_titre($langs->trans('CreateShipment'), $_SERVER["PHP_SELF"], 'qty_prod', '', $param, 'align="right"', $sortfield, $sortorder);
-
+	
 	$generic_commande = new Commande($db);
-
+	
 	$formproduct = new FormProduct($db);
 	$shippableOrder = new ShippableOrder($db);
-
+	
 	print '</tr>';
 	print '<tr class="liste_titre">';
 	print '<td class="liste_titre">';
@@ -489,7 +490,7 @@ if ($resql) {
 	print '<td class="liste_titre" align="left">';
 	print '<input class="flat" type="text" size="6" name="sref_client" value="' . $sref_client . '">';
 	print '</td>';
-	if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+	if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 		print '<td class="liste_titre" align="left">';
 		print '<input class="flat" type="text" size="6" name="sproduct" value="' . $sproduct . '">';
 		print '</td>';
@@ -500,7 +501,7 @@ if ($resql) {
 	print '<td class="liste_titre">&nbsp;</td>';
 	print '<td class="liste_titre" align="center">';
 	//print $langs->trans('Month').': ';
-
+	
 	print '<input class="flat" type="text" size="1" maxlength="2" name="deliverymonth" value="'.$deliverymonth.'">';
 	//print '&nbsp;'.$langs->trans('Year').': ';
 	$formother->select_year($deliveryyear, 'deliveryyear', 1, 20, 5);
@@ -509,8 +510,8 @@ if ($resql) {
 	print '<td class="liste_titre">&nbsp;</td>';
     print '<td class="liste_titre maxwidthonsmartphone" align="right">';
 	$liststatus=array(
-	    '1'=>$langs->trans("StatusOrderValidated"),
-	    '2'=>$langs->trans("StatusOrderSentShort"),
+	    '1'=>$langs->trans("StatusOrderValidated"), 
+	    '2'=>$langs->trans("StatusOrderSentShort"), 
 	);
 	print $form->selectarray('search_status_cmd', $liststatus, $search_status_cmd, 1);
     print '</td>';
@@ -528,45 +529,45 @@ if ($resql) {
 	print '</tr>';
 /*	print '</form>';
 	print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
-*/
+*/	
 	$var = true;
 	$total = 0;
 	$totaltoship = 0;
 	$subtotal = 0;
-
+	
 	while ( $objp = $db->fetch_object($resql) ) {
-
+		
 		$BdisplayLine = true;
-
+		
 		$generic_commande->id = $objp->rowid;
 		$generic_commande->ref = $objp->ref;
 		$shippableOrder->isOrderShippable($objp->rowid);
-		if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+		if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 			$orderLine = new OrderLine($db);
 			$orderLine->fetch($objp->lineid);
 		}
-
+		
 		if (! empty($search_status)) {
-
+			
 			$result = $shippableOrder->orderStockStatus(true, 'code', $objp->lineid);
-
+			
 			if(!in_array($result, $search_status)) {
 				$BdisplayLine = false;
 			}
 		}
 		if ($BdisplayLine == true) {
-
+			
 			$var = ! $var;
 			print '<tr ' . $bc[$var] . '>';
 			print '<td class="nowrap">';
-
+			
 			print '<table class="nobordernopadding"><tr class="nocellnopadd">';
 			print '<td class="nobordernopadding nowrap">';
 			print $generic_commande->getNomUrl(1);
 			print '</td>';
-
+			
 			print '<td style="min-width: 20px" class="nobordernopadding nowrap">';
-			if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_commande), $db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
+			if (($objp->fk_statut > 0 && !empty($objp->delivery_date)) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_commande), $db->jdate($objp->delivery_date)) < ($now - $conf->commande->client->warning_delay))
 				print img_picto($langs->trans("Late"), "warning");
 			if (! empty($objp->note_private)) {
 				print ' <span class="note">';
@@ -574,7 +575,7 @@ if ($resql) {
 				print '</span>';
 			}
 			print '</td>';
-
+			
 			print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
 			$filename = dol_sanitizeFileName($objp->ref);
 			$filedir = $conf->commande->dir_output . '/' . dol_sanitizeFileName($objp->ref);
@@ -582,24 +583,24 @@ if ($resql) {
 			print $formfile->getDocumentsLink($generic_commande->element, $filename, $filedir);
 			print '</td>';
 			print '</tr></table>';
-
+			
 			print '</td>';
-
+			
 			// Payer : oui/non spécific Nomadic
 			if (!empty($conf->clinomadic->enabled)) {
 				print '<td align="center" class="nowrap" style="font-weight:bold;">' . ucfirst(($objp->reglement_recu != 'oui') ? "Non" : $objp->reglement_recu) . '</td>';
 			}
-
+			
 			// Ref customer
 			print '<td>' . $objp->ref_client . '</td>';
-			if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)) {
+			if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')) {
 				// fk product
 				dol_include_once('/product/class/product.class.php');
 				$prod = new Product($db);
 				$prod->fetch($objp->fk_product);
 				print '<td class="product" data-fk_prod="'.$objp->fk_product.'" >' . $prod->getNomUrl(1) . '</td>';
 			}
-
+			
 			// Company
 			$companystatic->id = $objp->socid;
 			$companystatic->nom = $objp->nom;
@@ -607,7 +608,7 @@ if ($resql) {
 			print '<td>';
 			print $companystatic->getNomUrl(1, 'customer');
 			print '</td>';
-
+			
 			// Order date
 			$y = dol_print_date($db->jdate($objp->date_commande), '%Y');
 			$m = dol_print_date($db->jdate($objp->date_commande), '%m');
@@ -618,18 +619,20 @@ if ($resql) {
 			print '<a href="' . $_SERVER['PHP_SELF'] . '?orderyear=' . $y . '&amp;ordermonth=' . $m . '">' . $m . '/</a>';
 			print '<a href="' . $_SERVER['PHP_SELF'] . '?orderyear=' . $y . '">' . $y . '</a>';
 			print '</td>';
-
+			
 			// Delivery date
-			$y = dol_print_date($db->jdate($objp->date_livraison), '%Y');
-			$m = dol_print_date($db->jdate($objp->date_livraison), '%m');
-			$ml = dol_print_date($db->jdate($objp->date_livraison), '%B');
-			$d = dol_print_date($db->jdate($objp->date_livraison), '%d');
+            if (!empty($objp->delivery_date)){
+				$y = dol_print_date($db->jdate($objp->delivery_date), '%Y');
+				$m = dol_print_date($db->jdate($objp->delivery_date), '%m');
+				$ml = dol_print_date($db->jdate($objp->delivery_date), '%B');
+				$d = dol_print_date($db->jdate($objp->delivery_date), '%d');
+			}
 			print '<td align="right">';
 			print $d . '/';
 			print '<a href="' . $_SERVER['PHP_SELF'] . '?deliveryyear=' . $y . '&amp;deliverymonth=' . $m . '">' . $m . '/</a>';
 			print '<a href="' . $_SERVER['PHP_SELF'] . '?deliveryyear=' . $y . '">' . $y . '</a>';
 			print '</td>';
-
+			
 			// Amount HT
 			print '<td align="right" class="nowrap">' . price($objp->total_ht) . '</td>';
             if(empty($objp->lineid))$objp->lineid=0;
@@ -645,23 +648,23 @@ if ($resql) {
 				);
 			}
 			// Amount HT remain to ship
-			if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+			if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 				print '<td align="right" class="nowrap">' . price(round($shippableOrder->TlinesShippable[$objp->lineid]['to_ship']*$objp->subprice, 2)) . '</td>';
 			}
 			else print '<td align="right" class="nowrap">' . price(round($shippableOrder->order->total_ht_to_ship, 2)) . '</td>';
-
+			
 			// Statut
 			print '<td align="right" class="nowrap">' . $generic_commande->LibStatut($objp->fk_statut, $objp->facturee, 5) . '</td>';
 
 			// Quantité de produit
 			print '<td align="right" class="qty" data-qty_shippable="'.$shippableOrder->TlinesShippable[$objp->lineid]['qty_shippable'].'" class="nowrap">' . $objp->qty_prod . '</td>';
-
+			
 			// Expédiable
             $TPictoShippable = $shippableOrder->orderLineStockStatus($orderLine,true);
-			print  !empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)?'<td align="right" class="nowrap">' .$TPictoShippable[0]. '</td>':'<td align="right" class="nowrap">' .$shippableOrder->orderStockStatus(true, 'txt', $objp->lineid) . '</td>';
-
-			if (! empty($conf->global->SHIPPABLEORDER_DEFAULT_WAREHOUSE)) {
-				$default_wharehouse = $conf->global->SHIPPABLEORDER_DEFAULT_WAREHOUSE;
+			print  getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')?'<td align="right" class="nowrap">' .$TPictoShippable[0]. '</td>':'<td align="right" class="nowrap">' .$shippableOrder->orderStockStatus(true, 'txt', $objp->lineid) . '</td>';
+			
+			if (getDolGlobalString('SHIPPABLEORDER_DEFAULT_WAREHOUSE')) {
+				$default_wharehouse = getDolGlobalString('SHIPPABLEORDER_DEFAULT_WAREHOUSE');
 			} else {
 				// Sélection de l'entrepot à déstocker pour l'expédition
 				// On met par défaut le premier entrepot créé
@@ -673,46 +676,51 @@ if ($resql) {
 				$res2 = $db->fetch_object($resql2);
 				$default_wharehouse = $res2->rowid;
 			}
-
-			if ((!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE) && ($shippableOrder->TlinesShippable[$objp->lineid]['qty_shippable']) >0 && ($shippableOrder->TlinesShippable[$objp->lineid]['qty_shippable'] -  $shippableOrder->TlinesShippable[$objp->lineid]['to_ship'])==0)
-				|| (empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)&&$shippableOrder->nbShippable > 0)) {
-
-				if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)) $checkId=$objp->lineid;
+			
+			if ((getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE') && ($shippableOrder->TlinesShippable[$objp->lineid]['qty_shippable']) >0 && ($shippableOrder->TlinesShippable[$objp->lineid]['qty_shippable'] -  $shippableOrder->TlinesShippable[$objp->lineid]['to_ship'])==0) 
+				|| (!getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')&&$shippableOrder->nbShippable > 0)) {
+				
+				if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')) $checkId=$objp->lineid;
 				else $checkId=$objp->rowid;
 				// TEnt_comm[] : clef = id_commande val = id_entrepot
-				/*echo strtotime($objp->date_livraison);exit;
+				/*echo strtotime($objp->delivery_date);exit;
 				 echo dol_now();exit;*/
-
+				
 				// Checkbox pour créer expédition
-				if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)){
+				if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 					print '<td align="right" class="nowrap">' . $formproduct->selectWarehouses($default_wharehouse, 'TEnt_comm[' . $checkId . ']', '', 1,'',$objp->fk_product) . '</td>';
-					$checked = $shippableOrder->is_ok_for_shipping($objp->lineid) && strtotime($objp->date_livraison) <= dol_now() ? 'checked="checked"' : '';
+					$checked = '';
+					if (!empty($objp->delivery_date)){
+						$checked = $shippableOrder->is_ok_for_shipping($objp->lineid) && strtotime($objp->delivery_date) <= dol_now() ? 'checked="checked"' : '';
+					}
 				}
 				else {
-
 					print '<td align="right" class="nowrap">' . $formproduct->selectWarehouses($default_wharehouse, 'TEnt_comm[' . $checkId . ']', '', 1) . '</td>';
-					$checked = $shippableOrder->is_ok_for_shipping() && strtotime($objp->date_livraison) <= dol_now() ? 'checked="checked"' : '';
+                    $checked = '';
+                    if (!empty($objp->delivery_date)){
+						$checked = $shippableOrder->is_ok_for_shipping() && strtotime($objp->delivery_date) <= dol_now() ? 'checked="checked"' : '';
+					}
 				}
-				if (!empty($conf->global->SHIPPABLEORDER_NO_DEFAULT_CHECK)) {
+				if (getDolGlobalString('SHIPPABLEORDER_NO_DEFAULT_CHECK')) {
 					$checked = false;
 				}
-
+				
 				print '<td align="right" class="nowrap">' . '<input class="checkforgen" type="checkbox" ' . $checked . ' name="TIDCommandes[]" value="' . $checkId . '" />' . '</td>';
 			} else {
-
+				
 				print '<td colspan="2">&nbsp;</td>';
 			}
-
+			
 			print '</tr>';
-
+			
 			$total += $objp->total_ht;
-			if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$totaltoship += $shippableOrder->TlinesShippable[$objp->lineid]['to_ship']*$objp->subprice;
+			if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$totaltoship += $shippableOrder->TlinesShippable[$objp->lineid]['to_ship']*$objp->subprice;
 			else $totaltoship += $shippableOrder->order->total_ht_to_ship;
 			$subtotal += $objp->total_ht;
 			$i ++;
 		}
 	}
-
+	
 	if ($total > 0) {
 		print '<tr class="liste_total">';
 		if ($limit === false) {
@@ -720,25 +728,24 @@ if ($resql) {
 		} else {
 			print '<td align="left">' . $langs->trans("TotalHTforthispage") . '</td>';
 		}
-		if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)) print '<td colspan="6" align="right"">' . price($total) . '</td>';
+		if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')) print '<td colspan="6" align="right"">' . price($total) . '</td>';
 		else print '<td colspan="5" align="right"">' . price($total) . '</td>';
 		print '<td align="right"">' . price($totaltoship) . '<td colspan="5"></td>';
 		print '</tr>';
 	}
-
+	
 	print '</table>';
-
-
-
-	if ($num > 0 && $user->rights->expedition->creer) {
+	
+	if ($num > 0 && $user->hasRight('expedition', 'creer')) {
 		print '<input type="hidden" name="action" value="createShipping"/>';
+        
         print '<br /><input style="float:right" class="butAction" type="submit" name="subCreateShip" value="' . $langs->trans('CreateShipmentButton') . '" />';
-		if (!empty($conf->global->SHIPPABLEORDER_ALLOW_CHANGE_STATUS_WITHOUT_SHIPMENT) && empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)) {
+		if (getDolGlobalString('SHIPPABLEORDER_ALLOW_CHANGE_STATUS_WITHOUT_SHIPMENT') && !getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')) {
 			print '<input style="float:right" class="butAction" type="submit" name="subSetSent" value="' . $langs->trans('SetOrderSentButton') . '" />';
 		}
 	}
 	print '</form>';
-
+	
 	?>
 <br>
 <table>
@@ -754,24 +761,24 @@ if ($resql) {
 	</table>
 
 <?php
-	if (!empty($conf->global->SHIPPABLEORDER_GENERATE_GLOBAL_PDF)) {
+	if (getDolGlobalString('SHIPPABLEORDER_GENERATE_GLOBAL_PDF')) {
 		print '<br><br>';
 		// We disable multilang because we concat already existing pdf.
 		$formfile = new FormFile($db);
 		$formfile->show_documents('shippableorder', '', $diroutputpdf, $urlsource, false, true, '', 1, 1, 0, 48, 1, $param, $langs->trans("GlobalGeneratedFiles"));
-
+		
 		echo '<div class="tabsAction">';
 		echo '<a class="butAction" href="?action=archive_files">'.$langs->trans('ArchiveFiles').'</a>';
 		echo '<a class="butAction" href="?action=delete_all_pdf_files">'.$langs->trans('DeleteAllFiles').'</a>';
 		echo '</div>';
 	}
-
+	
 	$db->free($resql);
 } else {
 	print dol_print_error($db);
 }
 
-if (!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))
+if (getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))
 {
 	?>
 	<script type="text/javascript">

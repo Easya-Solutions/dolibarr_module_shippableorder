@@ -86,7 +86,7 @@ if (preg_match('/del_(.*)/',$action,$reg))
 	}
 }
 
-$ent_by_user_activated = !empty($conf->global->SHIPPABLEORDER_ENTREPOT_BY_USER);
+$ent_by_user_activated = !empty(getDolGlobalString('SHIPPABLEORDER_ENTREPOT_BY_USER'));
 
 /*
  * View
@@ -145,7 +145,7 @@ foreach($formprod->cache_warehouses as $id=>$ent) {
 }
 
 
-echo $formDoli->multiselectarray('SHIPPABLEORDER_SPECIFIC_WAREHOUSE',$TWareHouse,explode(',', !empty($conf->global->SHIPPABLEORDER_SPECIFIC_WAREHOUSE)?$conf->global->SHIPPABLEORDER_SPECIFIC_WAREHOUSE:''));
+echo $formDoli->multiselectarray('SHIPPABLEORDER_SPECIFIC_WAREHOUSE',$TWareHouse,explode(',', getDolGlobalString('SHIPPABLEORDER_SPECIFIC_WAREHOUSE')));
 
 print '<input type="submit" '.($ent_by_user_activated ? 'disabled="disabled"' : '').' class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
@@ -160,7 +160,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_ENTREPOT_BY_USER">';
-print $formdoli->selectyesno("SHIPPABLEORDER_ENTREPOT_BY_USER",!empty($conf->global->SHIPPABLEORDER_ENTREPOT_BY_USER)?$conf->global->SHIPPABLEORDER_ENTREPOT_BY_USER:'',1);
+print $formdoli->selectyesno("SHIPPABLEORDER_ENTREPOT_BY_USER", getDolGlobalString('SHIPPABLEORDER_ENTREPOT_BY_USER'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -176,12 +176,12 @@ print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_GENERATE_SHIPMENT_PDF">';
 dol_include_once('/core/modules/expedition/modules_expedition.php');
 $liste = ModelePdfExpedition::liste_modeles($db);
-print $formdoli->selectarray('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF', $liste, !empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF)?$conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF:'', 1);
+print $formdoli->selectarray('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF', $liste, getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF'), 1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
 
-if(!empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF) && $conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF != -1 && strpos($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF, 'generic_expedition_odt') === false) {
+if(getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF') && getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF') != -1 && strpos( getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF'), 'generic_expedition_odt') === false) {
 	// Generate global PDF containing all PDF
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
@@ -191,7 +191,7 @@ if(!empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF) && $conf->global-
 	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 	print '<input type="hidden" name="token" value="'.$newToken.'">';
 	print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_GENERATE_GLOBAL_PDF">';
-	print $formdoli->selectyesno("SHIPPABLEORDER_GENERATE_GLOBAL_PDF",!empty($conf->global->SHIPPABLEORDER_GENERATE_GLOBAL_PDF)?$conf->global->SHIPPABLEORDER_GENERATE_GLOBAL_PDF:'',1);
+	print $formdoli->selectyesno("SHIPPABLEORDER_GENERATE_GLOBAL_PDF",getDolGlobalString('HIPPABLEORDER_GENERATE_GLOBAL_PDF'),1);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 	print '</form>';
 	print '</td></tr>';
@@ -206,7 +206,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_CLOSE_ORDER">';
-print $formdoli->selectyesno("SHIPPABLEORDER_CLOSE_ORDER",!empty($conf->global->SHIPPABLEORDER_CLOSE_ORDER)?$conf->global->SHIPPABLEORDER_CLOSE_ORDER:'',1);
+print $formdoli->selectyesno("SHIPPABLEORDER_CLOSE_ORDER", getDolGlobalString('SHIPPABLEORDER_CLOSE_ORDER'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -219,7 +219,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLE_ORDER_ALLOW_ALL_LINE">';
-print $formdoli->selectyesno("SHIPPABLE_ORDER_ALLOW_ALL_LINE",!empty($conf->global->SHIPPABLE_ORDER_ALLOW_ALL_LINE)?$conf->global->SHIPPABLE_ORDER_ALLOW_ALL_LINE:'',1);
+print $formdoli->selectyesno("SHIPPABLE_ORDER_ALLOW_ALL_LINE",getDolGlobalString('SHIPPABLE_ORDER_ALLOW_ALL_LINE'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -232,7 +232,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK">';
-print $formdoli->selectyesno("SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK",!empty($conf->global->SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK)?$conf->global->SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK:'',1);
+print $formdoli->selectyesno("SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK", getDolGlobalString('SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -245,7 +245,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING">';
-print $formdoli->selectyesno("SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING",!empty($conf->global->SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING)?$conf->global->SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING:'',1);
+print $formdoli->selectyesno("SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING", getDolGlobalString('SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -258,7 +258,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT">';
-print $formdoli->selectyesno("SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT",!empty($conf->global->SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT)?$conf->global->SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT:'',1);
+print $formdoli->selectyesno("SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT",getDolGlobalString('SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -271,7 +271,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_NO_DEFAULT_CHECK">';
-print $formdoli->selectyesno("SHIPPABLEORDER_NO_DEFAULT_CHECK",!empty($conf->global->SHIPPABLEORDER_NO_DEFAULT_CHECK)?$conf->global->SHIPPABLEORDER_NO_DEFAULT_CHECK:'',1);
+print $formdoli->selectyesno("SHIPPABLEORDER_NO_DEFAULT_CHECK",getDolGlobalString('SHIPPABLEORDER_NO_DEFAULT_CHECK'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -284,7 +284,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY">';
-print $formdoli->selectyesno("SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY",!empty($conf->global->SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY)?$conf->global->SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY:'',1);
+print $formdoli->selectyesno("SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY", getDolGlobalString('SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -298,7 +298,7 @@ print '<td align="right" width="300">';
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$newToken.'">';
 print '<input type="hidden" name="action" value="set_SHIPPABLEORDER_SELECT_BY_LINE">';
-print $formdoli->selectyesno("SHIPPABLEORDER_SELECT_BY_LINE",!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE)?$conf->global->SHIPPABLEORDER_SELECT_BY_LINE:'',1);
+print $formdoli->selectyesno("SHIPPABLEORDER_SELECT_BY_LINE",getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'),1);
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
@@ -311,7 +311,7 @@ llxFooter();
 
 $db->close();
 
-function create_extrafield($code, $label, $type, $elementtype, $options=array()) {
+function create_extrafield($code, $label, $type, $elementtype, $options='') {
 	
 	global $db;
 	

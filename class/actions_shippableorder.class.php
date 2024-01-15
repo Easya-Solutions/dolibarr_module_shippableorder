@@ -1,5 +1,8 @@
 <?php
-class ActionsShippableorder
+
+require_once __DIR__ . '/../backport/v19/core/class/commonhookactions.class.php';
+
+class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 {
      /** Overloading the doActions function : replacing the parent's function with the one below
       *  @param      parameters  meta datas of the hook (context, etc...)
@@ -39,7 +42,7 @@ class ActionsShippableorder
 				$shippableOrder =  &$object->shippableorder;
 				$form = new Form($db);
 				$virtualTooltip = ShippableOrder::prepareTooltip();
-				$textColor = !empty($conf->global->THEME_ELDY_TEXTTITLE) ? $conf->global->THEME_ELDY_TEXTTITLE : '';
+				$textColor = getDolGlobalString('THEME_ELDY_TEXTTITLE') ? getDolGlobalString('THEME_ELDY_TEXTTITLE') : '';
 
 
 				$jsConf = array(

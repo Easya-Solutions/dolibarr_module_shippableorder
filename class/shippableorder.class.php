@@ -81,13 +81,13 @@ class ShippableOrder
 		$TSomme = array();
 		foreach($this->order->lines as &$line){
 
-			if (!empty($conf->global->SHIPPABLE_ORDER_ALLOW_ALL_LINE) || ($line->product_type==0 && $line->fk_product>0))
+			if (getDolGlobalString('SHIPPABLE_ORDER_ALLOW_ALL_LINE') || ($line->product_type==0 && $line->fk_product>0))
 			{
 				if(empty($line->nbShippable)) $line->nbShippable = 0;
 				if(empty($line->nbPartiallyShippable)) $line->nbPartiallyShippable = 0;
 				if(empty($line->nbProduct)) $line->nbProduct = 0;
 				// Prise en compte des quantité déjà expédiéesz
-				if(empty($conf->global->SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY) || !$this->isDraftShipping($line->id)) {
+				if(!getDolGlobalString('SHIPPABLEORDER_DONT_CHECK_DRAFT_SHIPPING_QTY') || !$this->isDraftShipping($line->id)) {
 
 					if(!empty($this->order->expeditions[$line->id])) $qtyAlreadyShipped = $this->order->expeditions[$line->id];
 					else $qtyAlreadyShipped = 0;
@@ -116,7 +116,7 @@ class ShippableOrder
 
 			} elseif($line->product_type==1) { // On ne doit pas tenir compte du montant des services (et notament les frais de port) dans la colonne montant HT restant à expédier
 
-					if (empty($conf->global->STOCK_SUPPORTS_SERVICES)){
+					if (!getDolGlobalString('STOCK_SUPPORTS_SERVICES')){
 						$this->order->total_ht_to_ship -= $line->total_ht;
 					}
 			}
@@ -162,14 +162,14 @@ class ShippableOrder
 			$line->stock_virtuel = $produit->stock_theorique;
 
 			// Filtre par entrepot de l'utilisateur
-			if(!empty($conf->global->SHIPPABLEORDER_ENTREPOT_BY_USER) && !empty($user->array_options['options_entrepot_preferentiel'])) {
+			if(getDolGlobalString('SHIPPABLEORDER_ENTREPOT_BY_USER') && !empty($user->array_options['options_entrepot_preferentiel'])) {
 				$line->stock = $produit->stock_warehouse[$user->array_options['options_entrepot_preferentiel']]->real;
 			}
 			//Filtrer stock uniquement des entrepôts en conf
-			elseif(!empty($conf->global->SHIPPABLEORDER_SPECIFIC_WAREHOUSE)){
+			elseif(getDolGlobalString('SHIPPABLEORDER_SPECIFIC_WAREHOUSE')){
 				$line->stock = 0;
 				//Récupération des entrepôts valide
-				$TIdWarehouse = explode(',', $conf->global->SHIPPABLEORDER_SPECIFIC_WAREHOUSE);
+				$TIdWarehouse = explode(',',  getDolGlobalString('SHIPPABLEORDER_SPECIFIC_WAREHOUSE'));
 
 				foreach($produit->stock_warehouse as $identrepot => $objecttemp ){
 					if(in_array($identrepot, $TIdWarehouse)){
@@ -203,7 +203,7 @@ class ShippableOrder
      */
     public static function getQtyShippable($stock, $line, $TSomme) {
         global $conf;
-        if (!empty($conf->global->SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK))
+        if (getDolGlobalString('SHIPPABLE_ORDER_ALLOW_SHIPPING_IF_NOT_ENOUGH_STOCK'))
 		{
 			$isShippable = 1;
 			$qtyShippable = $line->qty;
@@ -232,7 +232,7 @@ class ShippableOrder
 
 		$txt = '';
 		$obj = $this;
-		if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE) && $lineid>0){
+		if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE') && $lineid>0){
 			foreach($this->order->lines as $line){
 				if($line->id == $lineid){
 					$obj = $line;
@@ -275,7 +275,7 @@ class ShippableOrder
 		if ($short)
 			$label = 'NbProductShippableShort';
 
-		if(empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))$txt .= ' ' . $langs->trans($label, $this->nbShippable, $this->nbProduct);
+		if(!getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))$txt .= ' ' . $langs->trans($label, $this->nbShippable, $this->nbProduct);
 
 		if ($mode == 'txt') {
 			return $txt;
@@ -322,26 +322,26 @@ class ShippableOrder
 		}
 
 		// Stock decrease mode
-		if (!empty($conf->global->STOCK_CALCULATE_ON_SHIPMENT) || !empty($conf->global->STOCK_CALCULATE_ON_SHIPMENT_CLOSE) || !empty($conf->global->STOCK_CALCULATE_ON_BILL)) {
+		if (getDolGlobalString('STOCK_CALCULATE_ON_SHIPMENT') || getDolGlobalString('STOCK_CALCULATE_ON_SHIPMENT_CLOSE') || getDolGlobalString('STOCK_CALCULATE_ON_BILL')) {
             $out .= $langs->trans('VirtualStockDetail', $langs->trans('Orders'), $langs->trans('Orders_status'));
-			if (!empty($conf->global->STOCK_CALCULATE_ON_SHIPMENT)) {
+			if (getDolGlobalString('STOCK_CALCULATE_ON_SHIPMENT')) {
 				$out .= $langs->trans('VirtualStockDetail', $langs->trans('ShippableOrder_Shipments'), $langs->trans('Shipments_status'));
-			} elseif (!empty($conf->global->STOCK_CALCULATE_ON_SHIPMENT_CLOSE)) {
+			} elseif (getDolGlobalString('STOCK_CALCULATE_ON_SHIPMENT_CLOSE')) {
 				$out .= $langs->trans('VirtualStockDetail', $langs->trans('ShippableOrder_Shipments'), $langs->trans('Shipments_status_closed'));
 			}
 
 		}
 		// Stock Increase mode
-		if (!empty($conf->global->STOCK_CALCULATE_ON_RECEPTION)
-            || !empty($conf->global->STOCK_CALCULATE_ON_RECEPTION_CLOSE)
-            || !empty($conf->global->STOCK_CALCULATE_ON_SUPPLIER_DISPATCH_ORDER)
-            || !empty($conf->global->STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER)
-            || !empty($conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL)) {
+		if (getDolGlobalString('STOCK_CALCULATE_ON_RECEPTION')
+            || getDolGlobalString('STOCK_CALCULATE_ON_RECEPTION_CLOSE')
+            || getDolGlobalString('STOCK_CALCULATE_ON_SUPPLIER_DISPATCH_ORDER')
+            || getDolGlobalString('STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER')
+            || getDolGlobalString('STOCK_CALCULATE_ON_SUPPLIER_BILL')) {
             $statusCmdFourn = 'PO_status';
             if (isset($includedraftpoforvirtual)) {
                 $statusCmdFourn .= '_all';
             }
-            if(empty($conf->global->STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER)) $out .= $langs->trans('VirtualStockDetail', $langs->trans('PO'), $langs->trans($statusCmdFourn));
+            if(!getDolGlobalString('STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER')) $out .= $langs->trans('VirtualStockDetail', $langs->trans('PO'), $langs->trans($statusCmdFourn));
             $out .= $langs->trans('VirtualStockDetail', $langs->trans('ShippableOrder_Receptions'), $langs->trans('Receptions_status'));
 
 		}
@@ -416,7 +416,7 @@ class ShippableOrder
 	function is_ok_for_shipping($lineid=''){
 		global $conf;
 		$obj=$this;
-		if(!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE) && $lineid>0){
+		if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE') && $lineid>0){
 			foreach($this->order->lines as $line){
 				if($line->id == $lineid){
 					$obj = $line;
@@ -537,14 +537,15 @@ class ShippableOrder
 		dol_include_once('/core/lib/product.lib.php');
 
         // Option pour la génération PDF
-		$hidedetails = (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0);
-		$hidedesc = (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0);
-		$hideref = (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0);
+		$hidedetails = (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0);
+		$hidedesc = (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0);
+		$hideref = (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0);
 
 		$nbShippingCreated = 0;
-		if (count($TIDCommandes) > 0)
+
+		if (isset($TIDCommandes) && is_array($TIDCommandes) && count($TIDCommandes) > 0)
 		{
-			if (!empty($conf->global->SHIPPABLEORDER_SELECT_BY_LINE))
+			if (getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE'))
 			{
 				$TToShip = $this->groupLineByOrder($TIDCommandes); //On fait une expédition par commande
 
@@ -556,10 +557,11 @@ class ShippableOrder
 					$shipping = new Expedition($db);
 					$shipping->origin = 'commande';
 					$shipping->origin_id = $id_commande;
-					$shipping->date_delivery = $this->order->date_livraison;
+					$shipping->date_delivery = $this->order->delivery_date;
 					$shipping->note_public = $this->order->note_public;
 					$shipping->note_private = $this->order->note_private;
 					$shipping->shipping_method_id = $this->order->shipping_method_id;
+					$shipping->ref_customer = $this->order->ref_client;
 
 					$shipping->weight_units = 0;
 					$shipping->weight = "NULL";
@@ -568,7 +570,7 @@ class ShippableOrder
 					$shipping->sizeS = "NULL";
 					$shipping->size_units = 0;
 					$shipping->socid = $this->order->socid;
-					$shipping->modelpdf = !empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF) ? $conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF : 'rouget';
+					$shipping->modelpdf = getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF') ? getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF')  : 'rouget';
 
 					foreach ($this->order->lines as $line)
 					{
@@ -601,7 +603,7 @@ class ShippableOrder
 					$shipping->create($user);
 
 					// Valider l'expédition
-					if (!empty($conf->global->SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING))
+					if (getDolGlobalString('SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING'))
 					{
 						if (empty($shipping->ref))
 							$shipping->ref = '(PROV'.$shipping->id.')';
@@ -610,7 +612,7 @@ class ShippableOrder
 					}
 
 					// Génération du PDF
-					if (!empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF))
+					if (getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF'))
 						$TFiles[] = $this->shipment_generate_pdf($shipping, $hidedetails, $hidedesc, $hideref);
 				}
 			} else {
@@ -625,9 +627,10 @@ class ShippableOrder
 					$shipping = new Expedition($db);
 					$shipping->origin = 'commande';
 					$shipping->origin_id = $id_commande;
-					$shipping->date_delivery = $this->order->date_livraison;
+					$shipping->date_delivery = $this->order->delivery_date;
 					$shipping->note_public = $this->order->note_public;
 					$shipping->note_private = $this->order->note_private;
+					$shipping->ref_customer = $this->order->ref_client;
 
 					$shipping->weight_units = 0;
 					$shipping->weight = "NULL";
@@ -636,7 +639,7 @@ class ShippableOrder
 					$shipping->sizeS = "NULL";
 					$shipping->size_units = 0;
 					$shipping->socid = $this->order->socid;
-					$shipping->modelpdf = !empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF) ? $conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF : 'rouget';
+					$shipping->modelpdf = getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF') ? getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF')  : 'rouget';
 
 					foreach ($this->order->lines as $line)
 					{
@@ -659,7 +662,7 @@ class ShippableOrder
 					$shipping->create($user);
 
 					// Valider l'expédition
-					if (!empty($conf->global->SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING))
+					if (getDolGlobalString('SHIPPABLE_ORDER_AUTO_VALIDATE_SHIPPING'))
 					{
 						if (empty($shipping->ref))
 							$shipping->ref = '(PROV'.$shipping->id.')';
@@ -668,7 +671,7 @@ class ShippableOrder
 					}
 
 					// Génération du PDF
-					if (!empty($conf->global->SHIPPABLEORDER_GENERATE_SHIPMENT_PDF))
+					if (getDolGlobalString('SHIPPABLEORDER_GENERATE_SHIPMENT_PDF'))
 						$TFiles[] = $this->shipment_generate_pdf($shipping, $hidedetails, $hidedesc, $hideref);
 				}
 			}
@@ -680,12 +683,12 @@ class ShippableOrder
 
 
 			if($nbShippingCreated > 0) {
-				if(!empty($conf->global->SHIPPABLEORDER_GENERATE_GLOBAL_PDF)) $this->generate_global_pdf($TFiles);
+				if(getDolGlobalString('SHIPPABLEORDER_GENERATE_GLOBAL_PDF')) $this->generate_global_pdf($TFiles);
 
 				setEventMessage($langs->trans('NbShippingCreated', $nbShippingCreated));
 				$dol_version = (float) DOL_VERSION;
 
-				if (!empty($conf->global->SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT))
+				if (getDolGlobalString('SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT'))
 				{
 
 					header("Location: ".$_SERVER["PHP_SELF"].'?'.http_build_query($TURL) );
@@ -699,7 +702,7 @@ class ShippableOrder
 				setEventMessage($langs->trans('NoOrderSelectedOrAlreadySent'), 'warnings');
 				$dol_version = (float) DOL_VERSION;
 
-				if (!empty($conf->global->SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT))
+				if (getDolGlobalString('SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT'))
 				{
 					header("Location: ".$_SERVER["PHP_SELF"].'?'.http_build_query($TURL) );
 				}else{
@@ -712,7 +715,7 @@ class ShippableOrder
 			setEventMessage($langs->trans('NoOrderSelectedOrAlreadySent'), 'warnings');
 			$dol_version = (float) DOL_VERSION;
 
-			if ($conf->global->SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT)
+			if (getDolGlobalString('SHIPPABLE_ORDER_DISABLE_AUTO_REDIRECT'))
 			{
 				header("Location: ".$_SERVER["PHP_SELF"]);
 			}else{
@@ -751,7 +754,7 @@ class ShippableOrder
 		exit;*/
 
 		$outputlangs = $langs;
-		if ($conf->global->MAIN_MULTILANGS) {$newlang=$shipment->client->default_lang;}
+		if (getDolGlobalString('MAIN_MULTILANGS')) {$newlang=$shipment->client->default_lang;}
 		if (! empty($newlang)) {
 			$outputlangs = new Translate("",$conf);
 			$outputlangs->setDefaultLang($newlang);
@@ -781,7 +784,7 @@ class ShippableOrder
         }
         $pdf->SetFont(pdf_getPDFFont($langs));
 
-        if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
+        if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION')) $pdf->SetCompression(false);
 
 		// Add all others
 		foreach($TFiles as $file)
@@ -809,8 +812,8 @@ class ShippableOrder
 			$now=dol_now();
 			$file=$diroutputpdf.'/'.$filename.'_'.dol_print_date($now,'dayhourlog').'.pdf';
 			$pdf->Output($file,'F');
-			if (! empty($conf->global->MAIN_UMASK))
-			@chmod($file, octdec($conf->global->MAIN_UMASK));
+			if (getDolGlobalString('MAIN_UMASK'))
+			@chmod($file, octdec(getDolGlobalString('MAIN_UMASK')));
 
 			//var_dump($file,$diroutputpdf,$filename,$pagecount);exit;
 		}

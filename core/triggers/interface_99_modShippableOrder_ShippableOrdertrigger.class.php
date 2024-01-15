@@ -116,7 +116,7 @@ class InterfaceShippableOrdertrigger
 		if ($action == 'SHIPPING_VALIDATE') {
 
 			// Classer délivrée la commande si totalement expédiée
-			if($conf->global->SHIPPABLEORDER_CLOSE_ORDER) {
+			if(getDolGlobalString('SHIPPABLEORDER_CLOSE_ORDER')) {
 				dol_include_once('/commande/class/commande.class.php');
 				dol_include_once('/shippableorder/class/shippableorder.class.php');
 				
