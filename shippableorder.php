@@ -102,7 +102,7 @@ $action = GETPOST('action','alphanohtml');
 
 switch ($action) {
 	case 'createShipping' :
-        var_dump($_REQUEST);
+        
 		if (! empty($_REQUEST['subCreateShip'])) {
 			$TIDCommandes = key_exists('TIDCommandes', $_REQUEST) ? $_REQUEST['TIDCommandes']: '';
 			$TEnt_comm =  key_exists('TEnt_comm', $_REQUEST) ? $_REQUEST['TEnt_comm']: '';
@@ -417,7 +417,7 @@ if ($resql) {
 	
 	// Lignes des champs de filtre
 	print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
-	
+	print '<input type="hidden" name="token" value="'.$newToken.'">';
 	print '<table class="noborder liste" width="100%">';
 	
 	$moreforfilter = '';
@@ -738,7 +738,7 @@ if ($resql) {
 	
 	if ($num > 0 && $user->hasRight('expedition', 'creer')) {
 		print '<input type="hidden" name="action" value="createShipping"/>';
-        print '<input type="hidden" name="token" value="'.$newToken.'">';
+        
         print '<br /><input style="float:right" class="butAction" type="submit" name="subCreateShip" value="' . $langs->trans('CreateShipmentButton') . '" />';
 		if (getDolGlobalString('SHIPPABLEORDER_ALLOW_CHANGE_STATUS_WITHOUT_SHIPMENT') && !getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')) {
 			print '<input style="float:right" class="butAction" type="submit" name="subSetSent" value="' . $langs->trans('SetOrderSentButton') . '" />';
