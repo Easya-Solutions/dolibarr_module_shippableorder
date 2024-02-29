@@ -456,7 +456,7 @@ class ShippableOrder
 		//var_dump($TIDCommandes);
 		return $TIDCommandes;
 	}
-	function _sort_by_client(&$a, &$b) {
+	function _sort_by_client($a, $b) {
 
 		if($a->socid < $b->socid) return -1;
 		else if($a->socid > $b->socid) return 1;
