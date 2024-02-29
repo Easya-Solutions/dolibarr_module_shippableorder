@@ -18,7 +18,6 @@ class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 		if (in_array('ordercard',explode(':',$parameters['context'])) && $object->statut < 3 && $object->id > 0)
         {
         	dol_include_once('/shippableorder/class/shippableorder.class.php');
-
 			$shippableOrder = new ShippableOrder($db);
 			$shippableOrder->isOrderShippable($object->id);
         	echo '<tr><td>'.$langs->trans('ShippableStatus').'</td>';
@@ -58,8 +57,8 @@ class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 					$stock = $shippableOrder->orderLineStockStatus($line,true);
 					$jsConf['lines'][] = array(
 						'id' => $line->id,
-						'stockReal' => $stock[0],
-						'stockVirtual' => $stock[1]
+						'stockReal' => $stock[0] ?? '',
+						'stockVirtual' => $stock[1] ?? ''
 					) ;
 				}
 
