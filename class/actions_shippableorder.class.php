@@ -13,7 +13,7 @@ class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 
     function formObjectOptions($parameters, &$object, &$action, $hookmanager)
     {
-      	global $db, $langs;
+      	global $db, $langs, $shippableOrder;
 
 		if (in_array('ordercard',explode(':',$parameters['context'])) && $object->statut < 3 && $object->id > 0)
         {
@@ -22,6 +22,7 @@ class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 			$shippableOrder->isOrderShippable($object->id);
         	echo '<tr><td>'.$langs->trans('ShippableStatus').'</td>';
 			echo '<td>'.$shippableOrder->orderStockStatus(false).'</td></tr>';
+
 			$object->shippableorder = $shippableOrder;
         }
 
@@ -30,7 +31,7 @@ class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
     {
-      	global $db, $langs, $conf;
+      	global $db, $langs, $conf, $shippableOrder;
 
 		if (in_array('ordercard',explode(':',$parameters['context'])) && $object->statut < 3)
         {
@@ -38,7 +39,6 @@ class ActionsShippableorder extends \shippableorder\RetroCompatCommonHookActions
 				dol_include_once('/shippableorder/class/shippableorder.class.php');
 				include_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 
-				$shippableOrder =  &$object->shippableorder;
 				$form = new Form($db);
 				$virtualTooltip = ShippableOrder::prepareTooltip();
 				$textColor = getDolGlobalString('THEME_ELDY_TEXTTITLE') ? getDolGlobalString('THEME_ELDY_TEXTTITLE') : '';
