@@ -360,7 +360,6 @@ if ($limit > 0) {
 
 // echo $sql; exit;
 
-// print $sql;
 $resql = $db->query($sql);
 if ($resql) {
 	if ($socid) {
@@ -567,7 +566,7 @@ if ($resql) {
 			print '</td>';
 			
 			print '<td style="min-width: 20px" class="nobordernopadding nowrap">';
-			if (($objp->fk_statut > 0 && !empty($objp->delivery_date)) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_commande), $db->jdate($objp->delivery_date)) < ($now - $conf->commande->client->warning_delay))
+			if (($objp->fk_statut > 0 && !empty($objp->date_livraison)) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_commande), $db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
 				print img_picto($langs->trans("Late"), "warning");
 			if (! empty($objp->note_private)) {
 				print ' <span class="note">';
@@ -621,11 +620,11 @@ if ($resql) {
 			print '</td>';
 			
 			// Delivery date
-            if (!empty($objp->delivery_date)){
-				$y = dol_print_date($db->jdate($objp->delivery_date), '%Y');
-				$m = dol_print_date($db->jdate($objp->delivery_date), '%m');
-				$ml = dol_print_date($db->jdate($objp->delivery_date), '%B');
-				$d = dol_print_date($db->jdate($objp->delivery_date), '%d');
+            if (!empty($objp->date_livraison)){
+				$y = dol_print_date($db->jdate($objp->date_livraison), '%Y');
+				$m = dol_print_date($db->jdate($objp->date_livraison), '%m');
+				$ml = dol_print_date($db->jdate($objp->date_livraison), '%B');
+				$d = dol_print_date($db->jdate($objp->date_livraison), '%d');
 			}
 			print '<td align="right">';
 			print $d . '/';
@@ -690,15 +689,15 @@ if ($resql) {
 				if(getDolGlobalString('SHIPPABLEORDER_SELECT_BY_LINE')){
 					print '<td align="right" class="nowrap">' . $formproduct->selectWarehouses($default_wharehouse, 'TEnt_comm[' . $checkId . ']', '', 1,'',$objp->fk_product) . '</td>';
 					$checked = '';
-					if (!empty($objp->delivery_date)){
-						$checked = $shippableOrder->is_ok_for_shipping($objp->lineid) && strtotime($objp->delivery_date) <= dol_now() ? 'checked="checked"' : '';
+					if (!empty($objp->date_livraison)){
+						$checked = $shippableOrder->is_ok_for_shipping($objp->lineid) && strtotime($objp->date_livraison) <= dol_now() ? 'checked="checked"' : '';
 					}
 				}
 				else {
 					print '<td align="right" class="nowrap">' . $formproduct->selectWarehouses($default_wharehouse, 'TEnt_comm[' . $checkId . ']', '', 1) . '</td>';
                     $checked = '';
-                    if (!empty($objp->delivery_date)){
-						$checked = $shippableOrder->is_ok_for_shipping() && strtotime($objp->delivery_date) <= dol_now() ? 'checked="checked"' : '';
+                    if (!empty($objp->date_livraison)){
+						$checked = $shippableOrder->is_ok_for_shipping() && strtotime($objp->date_livraison) <= dol_now() ? 'checked="checked"' : '';
 					}
 				}
 				if (getDolGlobalString('SHIPPABLEORDER_NO_DEFAULT_CHECK')) {
