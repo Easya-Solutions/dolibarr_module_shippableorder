@@ -61,7 +61,7 @@ class modShippableOrder extends DolibarrModules
 		$this->description = "Description of module ShippableOrder";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 
-		$this->version = '2.4.1';
+		$this->version = '2.5.0';
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \shippableorder\TechATM::getLastModuleVersionUrl($this);
@@ -112,7 +112,7 @@ class modShippableOrder extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(7,0);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(12, 0);	// Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = array(16, 0);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("shippableorder@shippableorder");
 
 		// Constants
@@ -149,7 +149,7 @@ class modShippableOrder extends DolibarrModules
         $this->tabs = array();
 
         // Dictionaries
-	    if (! isset($conf->shippableorder->enabled))
+	    if (!isModEnabled('shippableorder'))
         {
         	$conf->shippableorder=new stdClass();
         	$conf->shippableorder->enabled=0;
@@ -239,7 +239,7 @@ class modShippableOrder extends DolibarrModules
 								'url'=>'/shippableorder/shippableorder.php',
 								'langs'=>'shippableorder@shippableorder',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1,
-								'enabled'=>'$conf->shippableorder->enabled',	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+								'enabled'=>"isModEnabled('shippableorder')",	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 								'perms'=>'$user->rights->commande->lire',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 								'target'=>'',
 								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
