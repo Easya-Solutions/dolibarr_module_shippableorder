@@ -123,14 +123,19 @@ class ShippableOrder
 		}
 	}
 
-	function isDraftShipping($fk_origin_line) {
+	function isDraftShipping($fk_elementdet) {
 
 		global $db;
 
 		$sql = 'SELECT e.fk_statut
 				FROM '.MAIN_DB_PREFIX.'expedition e
-				INNER JOIN '.MAIN_DB_PREFIX.'expeditiondet ed ON (ed.fk_expedition = e.rowid)
-				WHERE fk_origin_line = '.$fk_origin_line;
+				INNER JOIN '.MAIN_DB_PREFIX.'expeditiondet ed ON (ed.fk_expedition = e.rowid)';
+
+		if((int) DOL_VERSION < 20) {
+			$sql .= ' WHERE fk_origin_line = '.$fk_elementdet;
+		} else {
+			$sql .= ' WHERE fk_elementdet = '.$fk_elementdet;
+		}
 
 		$resql = $db->query($sql);
 		if($resql) {
