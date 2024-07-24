@@ -767,8 +767,8 @@ if ($resql) {
 		$formfile->show_documents('shippableorder', '', $diroutputpdf, $urlsource, false, true, '', 1, 1, 0, 48, 1, $param, $langs->trans("GlobalGeneratedFiles"));
 		
 		echo '<div class="tabsAction">';
-		echo '<a class="butAction" href="?action=archive_files">'.$langs->trans('ArchiveFiles').'</a>';
-		echo '<a class="butAction" href="?action=delete_all_pdf_files">'.$langs->trans('DeleteAllFiles').'</a>';
+		echo '<a class="butAction" href="?action=archive_files&token='.$newToken.'">'.$langs->trans('ArchiveFiles').'</a>';
+		echo '<a class="butAction" href="?action=delete_all_pdf_files&token='.$newToken.'">'.$langs->trans('DeleteAllFiles').'</a>';
 		echo '</div>';
 	}
 	
