@@ -4,6 +4,11 @@
 
 
 
+## RELEASE 2.5
+
+- FIX : Compat v20
+  Changed Dolibarr compatibility range to 16 min - 20 max - *24/07/2024* - 2.5.0
+
 ## RELEASE 2.4
 
 - FIX : DA024771 - La date de livraison n'était pas bonne dans la liste des commandes expédiables - *04/04/2023* - 2.4.1

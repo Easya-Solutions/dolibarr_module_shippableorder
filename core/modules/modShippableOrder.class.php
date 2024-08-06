@@ -61,7 +61,7 @@ class modShippableOrder extends DolibarrModules
 		$this->description = "Description of module ShippableOrder";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 
-		$this->version = '2.4.1';
+		$this->version = '2.5.0';
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \shippableorder\TechATM::getLastModuleVersionUrl($this);
@@ -79,21 +79,6 @@ class modShippableOrder extends DolibarrModules
 		// for default path (eg: /shippableorder/core/xxxxx) (0=disable, 1=enable)
 		// for specific path of parts (eg: /shippableorder/core/modules/barcode)
 		// for specific css file (eg: /shippableorder/css/shippableorder.css.php)
-		//$this->module_parts = array(
-		//                        	'triggers' => 0,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
-		//							'login' => 0,                                    	// Set this to 1 if module has its own login method directory (core/login)
-		//							'substitutions' => 0,                            	// Set this to 1 if module has its own substitution function file (core/substitutions)
-		//							'menus' => 0,                                    	// Set this to 1 if module has its own menus handler directory (core/menus)
-		//							'theme' => 0,                                    	// Set this to 1 if module has its own theme directory (theme)
-		//                        	'tpl' => 0,                                      	// Set this to 1 if module overwrite template dir (core/tpl)
-		//							'barcode' => 0,                                  	// Set this to 1 if module has its own barcode directory (core/modules/barcode)
-		//							'models' => 0,                                   	// Set this to 1 if module has its own models directory (core/modules/xxx)
-		//							'css' => array('/shippableorder/css/shippableorder.css.php'),	// Set this to relative path of css file if module has its own css file
-	 	//							'js' => array('/shippableorder/js/shippableorder.js'),          // Set this to relative path of js file if module must load a js on all pages
-		//							'hooks' => array('hookcontext1','hookcontext2')  	// Set here all hooks context managed by module
-		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
-		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@shippableorder')) // Set here all workflow context managed by module
-		//                        );
 		$this->module_parts = array(
 			'hooks'=>array('ordercard')
 			,'triggers'=>1
@@ -112,7 +97,7 @@ class modShippableOrder extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(7,0);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(12, 0);	// Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = array(16, 0);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("shippableorder@shippableorder");
 
 		// Constants
@@ -149,27 +134,12 @@ class modShippableOrder extends DolibarrModules
         $this->tabs = array();
 
         // Dictionaries
-	    if (! isset($conf->shippableorder->enabled))
+	    if (!isModEnabled('shippableorder'))
         {
         	$conf->shippableorder=new stdClass();
         	$conf->shippableorder->enabled=0;
         }
 		$this->dictionaries=array();
-        /* Example:
-        if (! isset($conf->shippableorder->enabled)) $conf->shippableorder->enabled=0;	// This is to avoid warnings
-        $this->dictionaries=array(
-            'langs'=>'mylangfile@shippableorder',
-            'tabname'=>array(MAIN_DB_PREFIX."table1",MAIN_DB_PREFIX."table2",MAIN_DB_PREFIX."table3"),		// List of tables we want to see into dictonnary editor
-            'tablib'=>array("Table1","Table2","Table3"),													// Label of tables
-            'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table1 as f','SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table2 as f','SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table3 as f'),	// Request to select fields
-            'tabsqlsort'=>array("label ASC","label ASC","label ASC"),																					// Sort order
-            'tabfield'=>array("code,label","code,label","code,label"),																					// List of fields (result of select to show dictionary)
-            'tabfieldvalue'=>array("code,label","code,label","code,label"),																				// List of fields (list of fields to edit a record)
-            'tabfieldinsert'=>array("code,label","code,label","code,label"),																			// List of fields (list of fields for insert)
-            'tabrowid'=>array("rowid","rowid","rowid"),																									// Name of columns with primary key (try to always name it 'rowid')
-            'tabcond'=>array($conf->shippableorder->enabled,$conf->shippableorder->enabled,$conf->shippableorder->enabled)												// Condition to show each dictionary
-        );
-        */
 
         // Boxes
 		// Add here list of php file(s) stored in core/boxes that contains class to show a box.
@@ -201,36 +171,6 @@ class modShippableOrder extends DolibarrModules
 		$r=0;
 
 		// Add here entries to declare new menus
-		//
-		// Example to declare a new Top Menu entry and its Left menu entry:
-		// $this->menu[$r]=array(	'fk_menu'=>0,			                // Put 0 if this is a top menu
-		//							'type'=>'top',			                // This is a Top menu entry
-		//							'titre'=>'ShippableOrder top menu',
-		//							'mainmenu'=>'shippableorder',
-		//							'leftmenu'=>'shippableorder',
-		//							'url'=>'/shippableorder/pagetop.php',
-		//							'langs'=>'mylangfile@shippableorder',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-		//							'position'=>100,
-		//							'enabled'=>'$conf->shippableorder->enabled',	// Define condition to show or hide menu entry. Use '$conf->shippableorder->enabled' if entry must be visible if module is enabled.
-		//							'perms'=>'1',			                // Use 'perms'=>'$user->rights->shippableorder->level1->level2' if you want your menu with a permission rules
-		//							'target'=>'',
-		//							'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		// $r++;
-		//
-		// Example to declare a Left Menu entry into an existing Top menu entry:
-		// $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=xxx',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-		//							'type'=>'left',			                // This is a Left menu entry
-		//							'titre'=>'ShippableOrder left menu',
-		//							'mainmenu'=>'xxx',
-		//							'leftmenu'=>'shippableorder',
-		//							'url'=>'/shippableorder/pagelevel2.php',
-		//							'langs'=>'mylangfile@shippableorder',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-		//							'position'=>100,
-		//							'enabled'=>'$conf->shippableorder->enabled',  // Define condition to show or hide menu entry. Use '$conf->shippableorder->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-		//							'perms'=>'1',			                // Use 'perms'=>'$user->rights->shippableorder->level1->level2' if you want your menu with a permission rules
-		//							'target'=>'',
-		//							'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		// $r++;
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=orders',			                // Put 0 if this is a top menu
 								'type'=>'left',			                // This is a Top menu entry
 								'titre'=>'ShippableOrdersMenu',
@@ -239,7 +179,7 @@ class modShippableOrder extends DolibarrModules
 								'url'=>'/shippableorder/shippableorder.php',
 								'langs'=>'shippableorder@shippableorder',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1,
-								'enabled'=>'$conf->shippableorder->enabled',	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+								'enabled'=>"isModEnabled('shippableorder')",	// Define condition to show or hide menu entry. Use "isModEnabled('mymodule')" if entry must be visible if module is enabled.
 								'perms'=>'$user->rights->commande->lire',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 								'target'=>'',
 								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
