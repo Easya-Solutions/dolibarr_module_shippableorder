@@ -123,14 +123,19 @@ class ShippableOrder
 		}
 	}
 
-	function isDraftShipping($fk_origin_line) {
+	function isDraftShipping($fk_elementdet) {
 
 		global $db;
 
 		$sql = 'SELECT e.fk_statut
 				FROM '.MAIN_DB_PREFIX.'expedition e
-				INNER JOIN '.MAIN_DB_PREFIX.'expeditiondet ed ON (ed.fk_expedition = e.rowid)
-				WHERE fk_origin_line = '.$fk_origin_line;
+				INNER JOIN '.MAIN_DB_PREFIX.'expeditiondet ed ON (ed.fk_expedition = e.rowid)';
+
+		if((int) DOL_VERSION < 20) {
+			$sql .= ' WHERE fk_origin_line = '.$fk_elementdet;
+		} else {
+			$sql .= ' WHERE fk_elementdet = '.$fk_elementdet;
+		}
 
 		$resql = $db->query($sql);
 		if($resql) {
@@ -317,7 +322,7 @@ class ShippableOrder
         global $langs, $conf;
         $out = $langs->trans('VirtualStockDetailHeader');
 
-		if (!empty($conf->mrp->enabled)) {
+		if (isModEnabled('mrp')) {
 			$out .= $langs->trans('VirtualStockDetail', $langs->trans('MO'), $langs->trans('MO_status'));
 		}
 
@@ -578,9 +583,9 @@ class ShippableOrder
                         if ($reshook < 0) {
                             setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
                         }
-
-						if ($this->TlinesShippable[$line->id]['stock'] > 0 && in_array($line->id, $lineids)) {
-                            if (! empty($conf->productbatch->enabled) && ! empty($line->fk_product) && ! empty($line->product_tobatch)){
+						if ($this->TlinesShippable[$line->id]['stock'] > 0 && in_array($line->id, $lineids))
+						{
+              if (isModEnabled('productbatch') && ! empty($line->fk_product) && ! empty($line->product_tobatch)){
 								dol_include_once('/product/class/product.class.php');
 								$product = new Product($db);
 								$product->fetch($line->fk_product);
